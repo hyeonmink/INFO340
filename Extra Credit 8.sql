@@ -31,6 +31,9 @@ RETURN @RET
 END
 
 
+ALTER TABLE [dbo].[New_Cust] WITH NOCHECK
+ADD CONSTRAINT CK_NoMoreThanTenPeople
+CHECK (dbo.fn_NoMoreThanTenPeople() = 0)
 
 --2. zipcode and company name
 CREATE PROC addPeople
