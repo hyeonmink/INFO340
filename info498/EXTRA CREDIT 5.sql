@@ -2,21 +2,25 @@
 CREATE PROC AddPerson
 	@StaffFname varchar(25),
 	@StaffLname varchar(25),
-	@PositionName varchar(25)
+	@PositionName varchar(25).
+	@DeptName varchar(25)
 AS
 BEGIN
 	BEGIN TRY
 		DECLARE @PositionID INT
 		DECLARE @StaffID INT
+		DECLARE @DeptID INT
 		SET @PositionID = (SELECT PositionID FROM POSITION P 
-							WHERE P.PositionName = @PositionName) 
+							WHERE P.PositionName = @PositionName)
+		SET @DeptID = (SELECT DeptID FROM DEPARTMENT D
+						WHERE D.DeptName = @DeptName)
 		BEGIN Tran T1
 		INSERT INTO STAFF(StaffFname, StaffLname)
 		VALUES(@StaffFname, @StaffLname)
 		SET @StaffID = SCOPE_IDENTITY()
 
-		INSERT INTO STAFF_POSITION(StaffID, PositionID, StaffPosBeginDate)
-		VALUES (@StaffID, @PositionID, GETDATE())
+		INSERT INTO STAFF_POSITION(StaffID, PositionID, DeptID, StaffPosBeginDate)
+		VALUES (@StaffID, @PositionID, @DeptID, GETDATE())
 		COMMIT Tran T1
 
 	END TRY
@@ -93,7 +97,7 @@ BEGIN
 
 		BEGIN Tran T1
 		SET @PersonRoleID = (SELECT PersonRoleID FROM PERSON_ROLE PR WHERE PR.PersonID = @PersonID
-																	   AND PR.RoleID = @RoleID)
+									   AND PR.RoleID = @RoleID)
 
 		INSERT INTO CLASS_LIST(ClassID, PersonRoleID, RegistrationDate)
 		VALEUS (@ClassID, @PersonRoleID, GETDATE())
@@ -132,7 +136,7 @@ BEGIN
 END
 GO
 
-ALTER TABLE STAFF
+ALTER TABLE CLASS_LIST
 ADD CONSTRAINT ck_NoBioPhilDudingSummer
 CHECK(dbo.fn_NoBioPhilDudingSummer() = 0)
 GO
@@ -181,7 +185,7 @@ AND CS.CourseName = 'MATH389'
 ORDER BY P.DateOfBirth ASC
 
 --7)	Write the code to determine the total number of dorm rooms that are of type ‘triple’ for McMahon Hall.
-SELECT Count(*) FROM ROOM_TYPE RT
+SELECT SUM(*) FROM ROOM_TYPE RT
 JOIN ROOM R ON RT.RoomTypeID = R.RoomTypeID
 JOIN BUILDING B ON R.BuildingID = B.BuildingID
 WHERE RT.RoomTypeName = 'Triple'
