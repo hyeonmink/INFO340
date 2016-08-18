@@ -184,7 +184,7 @@ AND C.ClassYear = 2016
 AND CS.CourseName = 'MATH389'
 ORDER BY P.DateOfBirth ASC
 
---7)	Write the code to determine the total number of dorm rooms that are of type ‘triple’ for McMahon Hall.
+--7)	Write the code to determine the total number of dorm rooms that are of type ‘triple?for McMahon Hall.
 SELECT SUM(*) FROM ROOM_TYPE RT
 JOIN ROOM R ON RT.RoomTypeID = R.RoomTypeID
 JOIN BUILDING B ON R.BuildingID = B.BuildingID
@@ -331,7 +331,8 @@ GO
  BEGIN
 	DECLARE @RET INT
 	SET @RET = (SELECT count(*) FROM EMPLOYEE_POSITION EP
-				WHERE EP.PositionID = @PositionID)
+				WHERE EP.PositionID = @PositionID
+				AND EP.EndDate IS NULL)
 	RETURN @RET
  END
  GO

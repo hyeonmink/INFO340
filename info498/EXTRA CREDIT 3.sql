@@ -17,27 +17,40 @@ CREATE PROC AddEmp
 	@rowguid uniqueidentifier,
 	@ModifiedDate datetime
 AS
+	IF @BirthDate > (SELECT GetDate() - (365.25 *18)) OR
+	(@BirthDate > (SELECT GetDate() - (365.25 *21)) AND @JobTitle NOT LIKE '%Assistant')
+		GOTO ERROR
+
 BEGIN TRAN T1
-IF(@BirthDate < getDate() - 365.25*20)
-	BEGIN
-		GOTO PROBLEM
-	END
-IF(@BirthDate > getDate() - 365.25 * 18)
-	BEGIN
-		IF(JobTitle LIKE '%Assistant')
-			BEGIN
-				INSERT INTO [HumanResources].[Employee] (NationalIdNumber, LoginID, JobTitle, BirthDate,
-								BirthDate, MaritalStatus, Gender, HireDate, SalariedFlag,
-								VacationHours, SickLeaveHours, CurrentFlag, rowguid,
-								ModifiedDate)
-			END
-	END
+	INSERT INTO [HumanResources].[Employee] (NationalIdNumber, LoginID, JobTitle, BirthDate,
+					BirthDate, MaritalStatus, Gender, HireDate, SalariedFlag,
+					VacationHours, SickLeaveHours, CurrentFlag, rowguid,
+					ModifiedDate)
+	VALUES(
+		@NationalIdNumber,
+		@LoginID,
+		@JobTitle,
+		@BirthDate,
+		@MaritalStatus,
+		@Gender,
+		@HireDate,
+		@SalariedFlag,
+		@VacationHours,
+		@SickLeaveHours,
+		@CurrentFlag,
+		@rowguid,
+		@ModifiedDate
+	)
+	IF @@ERROR <> 0
+	GOTO ERROR
+	ELSE 
+	COMMIT Tran T1
 
-
-
-PROBLEM:
+ERROR:
 IF (@@EEROR <> 0)
+
+
 BEGIN
-	PRINT ''
-	ROLLBACK TRAN
+	RAISERROR (54891,12,1)
+	ROLLBACK Tran T1
 END
